@@ -15,6 +15,9 @@ class GameScene extends Phaser.Scene {
     this.obstacles = null;
     this.jump = false;
     this.START_Y = null;
+
+    this.score = 0;
+    this.scoreText = '';
   }
 
   recycleObstacles() {
@@ -26,6 +29,7 @@ class GameScene extends Phaser.Scene {
       if (o.getBounds().right <= 0) {
         const OBSTACLES_SPACER = Phaser.Math.Between(...OBSTACLES_SPACER_RANGE);
         o.x = lastX + OBSTACLES_SPACER;
+        this.increaseScore();
       }
     });
   }
@@ -140,6 +144,8 @@ class GameScene extends Phaser.Scene {
       null,
       this
     );
+
+    this.createScore();
   }
 
   update() {
@@ -167,6 +173,19 @@ class GameScene extends Phaser.Scene {
     this.physics.pause();
     this.cat.setTint(0xff0000);
     alert('GAME OVER');
+  }
+
+  createScore() {
+    this.score = 0;
+    this.scoreText = this.add.text(16, 16, `Score: ${0}`, {
+      fontSize: '32px',
+      fill: '#FFFFFF',
+    });
+  }
+
+  increaseScore() {
+    this.score += 1;
+    this.scoreText.setText(`Score: ${this.score}`);
   }
 }
 
