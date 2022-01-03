@@ -15,7 +15,9 @@ class GameScene extends Phaser.Scene {
     this.START_Y = null;
 
     this.score = 0;
+    this.bestScore = 0;
     this.scoreText = '';
+    this.bestScoreText = '';
   }
 
   recycleObstacles() {
@@ -178,6 +180,7 @@ class GameScene extends Phaser.Scene {
   gameOver() {
     this.physics.pause();
     this.hero.setTint(0xff0000);
+    this.updateBestScore();
     alert('GAME OVER');
   }
 
@@ -193,11 +196,24 @@ class GameScene extends Phaser.Scene {
       fontSize: '32px',
       fill: '#FFFFFF',
     });
+
+    this.bestScore = 0;
+    this.bestScoreText = this.add.text(16, 48, `Best Score: ${0}`, {
+      fontSize: '16px',
+      fill: '#000000',
+    });
   }
 
   increaseScore() {
     this.score += 1;
     this.scoreText.setText(`Score: ${this.score}`);
+  }
+
+  updateBestScore() {
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+      this.bestScoreText.setText(`Best Score: ${this.bestScore}`);
+    }
   }
 }
 
