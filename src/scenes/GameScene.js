@@ -13,6 +13,7 @@ class GameScene extends Phaser.Scene {
 
     this.obstacles = null;
     this.START_Y = null;
+    this.jump = false;
 
     this.score = 0;
     this.scoreText = '';
@@ -45,10 +46,11 @@ class GameScene extends Phaser.Scene {
     this.load.image('forest10', 'assets/forest/Layer_0001_8.png');
     this.load.image('forest11', 'assets/forest/Layer_0000_9.png');
 
-    this.load.spritesheet('hero', 'assets/run.png', {
+    this.load.spritesheet('hero', 'assets/hero.png', {
       frameWidth: 21,
-      frameHeight: 33,
+      frameHeight: 34,
     });
+
     this.load.image('cactus', 'assets/cactus.png');
     this.load.image('ground', 'assets/ground.png');
   }
@@ -120,6 +122,13 @@ class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    this.anims.create({
+      key: 'jump',
+      frames: this.anims.generateFrameNumbers('hero', { start: 8, end: 9 }),
+      frameRate: 1,
+      repeat: -1,
+    });
+
     this.hero.play('run');
 
     this.obstacles = this.physics.add.group();
@@ -144,14 +153,24 @@ class GameScene extends Phaser.Scene {
       .setImmovable(true)
       .setOrigin(0);
 
-    this.physics.add.collider(this.hero, this.ground);
+    this.physics.add.collider(
+      this.hero,
+      this.ground,
+      this.resumeRunning,
+      null,
+      this
+    );
 
     this.foreground = this.add
       .tileSprite(0, 0, this.config.width, this.config.height, 'forest11')
       .setOrigin(0);
 
     this.input.keyboard.on('keydown_SPACE', () => {
-      if (this.hero.body.velocity.y === 0) this.hero.body.velocity.y = -600;
+      if (this.hero.body.velocity.y === 0) {
+        this.hero.body.velocity.y = -600;
+        this.hero.play('jump');
+        this.jump = true;
+      }
     });
 
     this.physics.add.collider(
@@ -184,6 +203,13 @@ class GameScene extends Phaser.Scene {
     this.physics.pause();
     this.hero.setTint(0xff0000);
     alert('GAME OVER');
+  }
+
+  resumeRunning() {
+    if (this.jump) {
+      this.hero.play('run');
+      this.jump = false;
+    }
   }
 
   createScore() {
