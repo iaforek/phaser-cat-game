@@ -11,9 +11,7 @@ class GameScene extends Phaser.Scene {
       height: 793,
     };
 
-    this.cat = null;
     this.obstacles = null;
-    this.jump = false;
     this.START_Y = null;
 
     this.score = 0;
@@ -47,8 +45,12 @@ class GameScene extends Phaser.Scene {
     this.load.image('forest10', 'assets/forest/Layer_0001_8.png');
     this.load.image('forest11', 'assets/forest/Layer_0000_9.png');
 
-    this.load.image('cat', 'assets/concept.gif');
+    this.load.spritesheet('hero', 'assets/run.png', {
+      frameWidth: 21,
+      frameHeight: 33,
+    });
     this.load.image('cactus', 'assets/cactus.png');
+    this.load.image('ground', 'assets/ground.png');
   }
 
   create() {
@@ -101,12 +103,24 @@ class GameScene extends Phaser.Scene {
       .tileSprite(0, 0, this.config.width, this.config.height, 'forest10')
       .setOrigin(0);
 
-    this.cat = this.physics.add
-      .sprite(this.config.width / 10, this.config.height / 1.15, 'cat')
+    this.hero = this.physics.add
+      .sprite(this.config.width / 10, this.config.height / 1.2, 'hero')
+      .setScale(3)
       .setOrigin(0);
 
-    this.START_Y = this.cat.y;
-    this.cat.body.gravity.y = 1000;
+    this.hero.setBodySize(this.hero.width - 10, this.hero.height - 10);
+
+    this.START_Y = this.hero.y;
+    this.hero.body.gravity.y = 1000;
+
+    this.anims.create({
+      key: 'run',
+      frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 8 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    this.hero.play('run');
 
     this.obstacles = this.physics.add.group();
 
@@ -125,20 +139,23 @@ class GameScene extends Phaser.Scene {
 
     this.obstacles.setVelocityX(-200);
 
+    this.ground = this.physics.add
+      .sprite(0, 760, 'ground')
+      .setImmovable(true)
+      .setOrigin(0);
+
+    this.physics.add.collider(this.hero, this.ground);
+
     this.foreground = this.add
       .tileSprite(0, 0, this.config.width, this.config.height, 'forest11')
       .setOrigin(0);
 
     this.input.keyboard.on('keydown_SPACE', () => {
-      if (!this.jump) {
-        this.cat.y = this.START_Y - 1;
-        this.cat.body.velocity.y = -500;
-        this.jump = true;
-      }
+      if (this.hero.body.velocity.y === 0) this.hero.body.velocity.y = -600;
     });
 
     this.physics.add.collider(
-      this.cat,
+      this.hero,
       this.obstacles,
       this.gameOver,
       null,
@@ -160,18 +177,12 @@ class GameScene extends Phaser.Scene {
       tree.setTilePosition((tree.tilePositionX += 0.5))
     );
 
-    if (this.cat.y >= this.START_Y) {
-      this.cat.y = this.START_Y;
-      this.cat.body.velocity.y = 0;
-      this.jump = false;
-    }
-
     this.recycleObstacles();
   }
 
   gameOver() {
     this.physics.pause();
-    this.cat.setTint(0xff0000);
+    this.hero.setTint(0xff0000);
     alert('GAME OVER');
   }
 
