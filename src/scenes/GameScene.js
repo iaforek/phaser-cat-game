@@ -13,7 +13,6 @@ class GameScene extends Phaser.Scene {
 
     this.obstacles = null;
     this.START_Y = null;
-    this.jump = false;
 
     this.score = 0;
     this.scoreText = '';
@@ -169,7 +168,6 @@ class GameScene extends Phaser.Scene {
       if (this.hero.body.velocity.y === 0) {
         this.hero.body.velocity.y = -600;
         this.hero.play('jump');
-        this.jump = true;
       }
     });
 
@@ -206,9 +204,8 @@ class GameScene extends Phaser.Scene {
   }
 
   resumeRunning() {
-    if (this.jump) {
+    if (!this.hero.body.wasTouching.down) {
       this.hero.play('run');
-      this.jump = false;
     }
   }
 
